@@ -1,24 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Aurora PNGTuber</title>
   <style>
     body {
-      background-color: #111;
+      background: transparent;
+      margin: 0;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
     }
     img {
-      height: 400px;
-      image-rendering: crisp-edges;
+      position: absolute;
+      width: 600px;
+      image-rendering: auto;
+      transition: opacity 0.1s ease;
     }
   </style>
 </head>
 <body>
-  <img src="aurora.png" alt="Aurora Avatar" />
+  <img id="closed" src="aurora_closed.png">
+  <img id="open" src="aurora_open.png" style="opacity: 0;">
+
+  <script>
+    let audioContext = new AudioContext();
+    let analyser = audioContext.createAnalyser();
+    let dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      let source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+      animate();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      analyser.getByteFrequencyData(dataArray);
+      let volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+
+      // mouth open if volume > threshold
+      document.getElementById("open").style.opacity = volume > 30 ? 1 : 0;
+      document.getElementById("closed").style.opacity = volume > 30 ? 0 : 1;
+    }
+  </script>
 </body>
 </html>
