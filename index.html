@@ -7,35 +7,31 @@
   <style>
     body {
       margin: 0;
-      background: #0b0b0b;
+      background: #111;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
     }
-
     img {
       position: absolute;
       width: 500px;
       height: auto;
       image-rendering: crisp-edges;
-      user-select: none;
-      -webkit-user-drag: none;
     }
   </style>
 </head>
 <body>
-  <img id="auroraNormal" src="aurora_closed.png" alt="Aurora Normal">
-  <img id="auroraBlink" src="aurora_blink.png" alt="Aurora Blink" style="display:none;">
-  <img id="auroraOpen" src="aurora_open.png" alt="Aurora Open" style="display:none;">
+  <img id="auroraNormal" src="AuroraNormal.png" alt="Aurora Normal">
+  <img id="auroraBlink" src="AuroraBlink.png" alt="Aurora Blink" style="display:none;">
+  <img id="auroraOpen" src="AuroraOpen.png" alt="Aurora Open" style="display:none;">
 
   <script>
     const normal = document.getElementById("auroraNormal");
     const blink = document.getElementById("auroraBlink");
     const open = document.getElementById("auroraOpen");
 
-    // Function: Blink animation
+    // 👁️ Blink animation
     function blinkNow() {
       normal.style.display = "none";
       blink.style.display = "block";
@@ -47,22 +43,62 @@
 
     // Blink every 4–6 seconds randomly
     setInterval(() => {
-      const randomTime = 4000 + Math.random() * 2000;
       blinkNow();
-    }, 5000);
+    }, 4000 + Math.random() * 2000);
 
-    // Function: Talk animation loop (optional test)
-    function simulateTalking() {
-      normal.style.display = "none";
-      open.style.display = "block";
-      setTimeout(() => {
-        open.style.display = "none";
-        normal.style.display = "block";
-      }, 250);
+    // 🎤 Microphone reactive mouth (with noise filtering)
+    async function startMic() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioContext = new AudioContext();
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        source.connect(analyser);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        let baseNoise = 0;
+
+        // Measure background noise for 1 second
+        const measureNoise = () => {
+          let samples = [];
+          const collect = setInterval(() => {
+            analyser.getByteFrequencyData(dataArray);
+            const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+            samples.push(avg);
+          }, 100);
+
+          setTimeout(() => {
+            clearInterval(collect);
+            baseNoise = samples.reduce((a, b) => a + b, 0) / samples.length + 10;
+            detectVolume();
+          }, 1000);
+        };
+
+        // Detect speaking vs silence
+        function detectVolume() {
+          analyser.getByteFrequencyData(dataArray);
+          const volume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+
+          if (volume > baseNoise + 15) {
+            normal.style.display = "none";
+            open.style.display = "block";
+          } else {
+            open.style.display = "none";
+            normal.style.display = "block";
+          }
+
+          requestAnimationFrame(detectVolume);
+        }
+
+        measureNoise();
+      } catch (err) {
+        alert("🎙️ Please allow microphone access for Aurora to talk!");
+        console.error(err);
+      }
     }
 
-    // Simulate talking every 2 seconds (for testing)
-    setInterval(simulateTalking, 2000);
+    startMic();
   </script>
 </body>
 </html>
