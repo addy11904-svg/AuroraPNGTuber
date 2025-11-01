@@ -7,49 +7,62 @@
   <style>
     body {
       margin: 0;
-      background: #111;
+      background: #0b0b0b;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      overflow: hidden;
     }
+
     img {
       position: absolute;
       width: 500px;
       height: auto;
       image-rendering: crisp-edges;
+      user-select: none;
+      -webkit-user-drag: none;
     }
   </style>
 </head>
 <body>
-  <img id="auroraNormal" src="AuroraNormal.png" alt="Aurora Normal">
-  <img id="auroraBlink" src="AuroraBlink.png" alt="Aurora Blink" style="display:none;">
-  <img id="auroraOpen" src="AuroraOpen.png" alt="Aurora Open" style="display:none;">
+  <img id="auroraNormal" src="aurora_closed.png" alt="Aurora Normal">
+  <img id="auroraBlink" src="aurora_blink.png" alt="Aurora Blink" style="display:none;">
+  <img id="auroraOpen" src="aurora_open.png" alt="Aurora Open" style="display:none;">
 
   <script>
     const normal = document.getElementById("auroraNormal");
     const blink = document.getElementById("auroraBlink");
     const open = document.getElementById("auroraOpen");
 
-    // Blink every few seconds
-    setInterval(() => {
+    // Function: Blink animation
+    function blinkNow() {
       normal.style.display = "none";
       blink.style.display = "block";
       setTimeout(() => {
         blink.style.display = "none";
         normal.style.display = "block";
-      }, 150); // blink speed
-    }, 4000); // blink interval
+      }, 150);
+    }
 
-    // Simulate talking loop (for testing)
+    // Blink every 4–6 seconds randomly
     setInterval(() => {
+      const randomTime = 4000 + Math.random() * 2000;
+      blinkNow();
+    }, 5000);
+
+    // Function: Talk animation loop (optional test)
+    function simulateTalking() {
       normal.style.display = "none";
       open.style.display = "block";
       setTimeout(() => {
         open.style.display = "none";
         normal.style.display = "block";
-      }, 300); // mouth open time
-    }, 2000); // talking interval
+      }, 250);
+    }
+
+    // Simulate talking every 2 seconds (for testing)
+    setInterval(simulateTalking, 2000);
   </script>
 </body>
 </html>
