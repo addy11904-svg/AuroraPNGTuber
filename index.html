@@ -3,58 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aurora Avatar</title>
+  <title>Aurora PNGTuber</title>
   <style>
     body {
       margin: 0;
-      height: 100vh;
+      background: #111;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: radial-gradient(circle at center, #181829, #0c0c18);
+      height: 100vh;
     }
-    .avatar {
-      width: 480px;
-      height: 480px;
-      position: relative;
-      image-rendering: crisp-edges;
-      image-rendering: pixelated;
-    }
-    .avatar img {
+    img {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      transition: opacity 0.1s ease;
-    }
-    #closed {
-      opacity: 0;
+      width: 500px;
+      height: auto;
+      image-rendering: crisp-edges;
     }
   </style>
 </head>
 <body>
-  <div class="avatar">
-    <img id="open" src="aurora_open.png" alt="Aurora Open Eyes">
-    <img id="closed" src="aurora_closed.png" alt="Aurora Closed Eyes">
-  </div>
+  <img id="auroraNormal" src="AuroraNormal.png" alt="Aurora Normal">
+  <img id="auroraBlink" src="AuroraBlink.png" alt="Aurora Blink" style="display:none;">
+  <img id="auroraOpen" src="AuroraOpen.png" alt="Aurora Open" style="display:none;">
 
   <script>
-    const open = document.getElementById('open');
-    const closed = document.getElementById('closed');
+    const normal = document.getElementById("auroraNormal");
+    const blink = document.getElementById("auroraBlink");
+    const open = document.getElementById("auroraOpen");
 
-    function blink() {
-      closed.style.opacity = 1;
-      open.style.opacity = 0;
-      setTimeout(() => {
-        closed.style.opacity = 0;
-        open.style.opacity = 1;
-      }, 180); // blink speed
-    }
-
+    // Blink every few seconds
     setInterval(() => {
-      if (Math.random() < 0.2) blink(); // 20% chance to blink every interval
-    }, 2000); // check every 2 seconds
+      normal.style.display = "none";
+      blink.style.display = "block";
+      setTimeout(() => {
+        blink.style.display = "none";
+        normal.style.display = "block";
+      }, 150); // blink speed
+    }, 4000); // blink interval
+
+    // Simulate talking loop (for testing)
+    setInterval(() => {
+      normal.style.display = "none";
+      open.style.display = "block";
+      setTimeout(() => {
+        open.style.display = "none";
+        normal.style.display = "block";
+      }, 300); // mouth open time
+    }, 2000); // talking interval
   </script>
 </body>
 </html>
