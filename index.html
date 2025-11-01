@@ -1,50 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aurora PNGTuber</title>
   <style>
     body {
-      background: transparent;
-      margin: 0;
-      overflow: hidden;
+      background-color: black;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
+      margin: 0;
     }
     img {
-      position: absolute;
-      width: 600px;
-      image-rendering: auto;
-      transition: opacity 0.1s ease;
+      max-width: 90%;
+      height: auto;
     }
   </style>
 </head>
 <body>
-  <img id="closed" src="aurora_closed.png">
-  <img id="open" src="aurora_open.png" style="opacity: 0;">
-
-  <script>
-    let audioContext = new AudioContext();
-    let analyser = audioContext.createAnalyser();
-    let dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-      let source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyser);
-      animate();
-    });
-
-    function animate() {
-      requestAnimationFrame(animate);
-      analyser.getByteFrequencyData(dataArray);
-      let volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
-
-      // mouth open if volume > threshold
-      document.getElementById("open").style.opacity = volume > 30 ? 1 : 0;
-      document.getElementById("closed").style.opacity = volume > 30 ? 0 : 1;
-    }
-  </script>
+  <img src="aurora_open.png" alt="Aurora Avatar">
 </body>
 </html>
