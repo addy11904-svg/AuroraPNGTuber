@@ -23,15 +23,15 @@
 </head>
 <body>
   <img id="auroraNormal" src="AuroraNormal.png" alt="Aurora Normal">
-  <img id="auroraBlink" src="AuroraBlink.png" alt="Aurora Blink" style="display:none;">
   <img id="auroraOpen" src="AuroraOpen.png" alt="Aurora Open" style="display:none;">
+  <img id="auroraBlink" src="AuroraBlink.png" alt="Aurora Blink" style="display:none;">
 
   <script>
     const normal = document.getElementById("auroraNormal");
-    const blink = document.getElementById("auroraBlink");
     const open = document.getElementById("auroraOpen");
+    const blink = document.getElementById("auroraBlink");
 
-    // 👁️ Blink animation
+    // 🌟 Blink every few seconds
     function blinkNow() {
       normal.style.display = "none";
       blink.style.display = "block";
@@ -39,61 +39,35 @@
         blink.style.display = "none";
         normal.style.display = "block";
       }, 150);
+      setTimeout(blinkNow, 4000 + Math.random() * 3000);
     }
+    setTimeout(blinkNow, 3000);
 
-    // Blink every 4–6 seconds randomly
-    setInterval(() => {
-      blinkNow();
-    }, 4000 + Math.random() * 2000);
-
-    // 🎤 Microphone reactive mouth (with noise filtering)
+    // 🎤 Mic-based mouth movement
     async function startMic() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const audioContext = new AudioContext();
         const source = audioContext.createMediaStreamSource(stream);
         const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 512;
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
         source.connect(analyser);
 
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        let baseNoise = 0;
-
-        // Measure background noise for 1 second
-        const measureNoise = () => {
-          let samples = [];
-          const collect = setInterval(() => {
-            analyser.getByteFrequencyData(dataArray);
-            const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-            samples.push(avg);
-          }, 100);
-
-          setTimeout(() => {
-            clearInterval(collect);
-            baseNoise = samples.reduce((a, b) => a + b, 0) / samples.length + 10;
-            detectVolume();
-          }, 1000);
-        };
-
-        // Detect speaking vs silence
-        function detectVolume() {
+        function animate() {
           analyser.getByteFrequencyData(dataArray);
-          const volume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-
-          if (volume > baseNoise + 15) {
+          const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+          if (volume > 40) { // adjust this number if it’s too sensitive
             normal.style.display = "none";
             open.style.display = "block";
           } else {
             open.style.display = "none";
             normal.style.display = "block";
           }
-
-          requestAnimationFrame(detectVolume);
+          requestAnimationFrame(animate);
         }
-
-        measureNoise();
+        animate();
       } catch (err) {
-        alert("🎙️ Please allow microphone access for Aurora to talk!");
+        alert("Mic access needed for talking animation!");
         console.error(err);
       }
     }
