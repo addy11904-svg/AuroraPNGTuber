@@ -3,76 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aurora PNGTuber</title>
+  <title>Aurora Talking Avatar</title>
   <style>
     body {
-      margin: 0;
-      background: #111;
+      background-color: #000;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
+      overflow: hidden;
     }
+
     img {
+      width: auto;
+      height: 90vh;
       position: absolute;
-      width: 500px;
-      height: auto;
+      transition: opacity 0.1s ease-in-out;
       image-rendering: crisp-edges;
     }
   </style>
 </head>
 <body>
-  <img id="auroraNormal" src="AuroraNormal.png" alt="Aurora Normal">
-  <img id="auroraOpen" src="AuroraOpen.png" alt="Aurora Open" style="display:none;">
-  <img id="auroraBlink" src="AuroraBlink.png" alt="Aurora Blink" style="display:none;">
+  <!-- Aurora Layers -->
+  <img id="base" src="aurora.mouthclose.png" alt="Aurora" />
+  <img id="mouth" src="aurora.mouthopen.png" alt="Aurora mouth open" style="opacity: 0;" />
+  <img id="blink" src="aurora.blink.png" alt="Aurora blink" style="opacity: 0;" />
 
   <script>
-    const normal = document.getElementById("auroraNormal");
-    const open = document.getElementById("auroraOpen");
-    const blink = document.getElementById("auroraBlink");
-
-    // 🌟 Blink every few seconds
-    function blinkNow() {
-      normal.style.display = "none";
-      blink.style.display = "block";
-      setTimeout(() => {
-        blink.style.display = "none";
-        normal.style.display = "block";
-      }, 150);
-      setTimeout(blinkNow, 4000 + Math.random() * 3000);
+    // 🌟 Blinking animation
+    function blink() {
+      const blinkImg = document.getElementById('blink');
+      blinkImg.style.opacity = 1;
+      setTimeout(() => (blinkImg.style.opacity = 0), 150);
+      setTimeout(blink, 4000 + Math.random() * 4000);
     }
-    setTimeout(blinkNow, 3000);
+    setTimeout(blink, 2000);
 
-    // 🎤 Mic-based mouth movement
-    async function startMic() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const audioContext = new AudioContext();
+    // 🎤 Talking with microphone input
+    const mouth = document.getElementById('mouth');
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioContext.createMediaStreamSource(stream);
         const analyser = audioContext.createAnalyser();
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.fftSize = 512;
         source.connect(analyser);
 
-        function animate() {
-          analyser.getByteFrequencyData(dataArray);
-          const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
-          if (volume > 40) { // adjust this number if it’s too sensitive
-            normal.style.display = "none";
-            open.style.display = "block";
-          } else {
-            open.style.display = "none";
-            normal.style.display = "block";
-          }
-          requestAnimationFrame(animate);
-        }
-        animate();
-      } catch (err) {
-        alert("Mic access needed for talking animation!");
-        console.error(err);
-      }
-    }
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-    startMic();
+        function animateMouth() {
+          analyser.getByteFrequencyData(dataArray);
+          const volume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+          mouth.style.opacity = volume > 40 ? 1 : 0; // open mouth if loud enough
+          requestAnimationFrame(animateMouth);
+        }
+
+        animateMouth();
+      })
+      .catch(err => {
+        console.error('Mic error:', err);
+        alert('Please allow microphone access to make Aurora talk.');
+      });
   </script>
 </body>
 </html>
